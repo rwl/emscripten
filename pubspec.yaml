@@ -1,0 +1,8 @@
+name: emscripten
+version: 0.0.1
+author: Richard Lincoln <r.w.lincoln@gmail.com>
+description: Access Emscripten modules from Dart
+homepage: https://github.com/rwl/emscripten
+dev_dependencies:
+  browser: any
+  test: any
