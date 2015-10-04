@@ -3,11 +3,17 @@ library emscripten.module.test;
 import 'package:test/test.dart';
 import 'package:emscripten/emscripten.dart';
 
+class TestModule extends Module {
+  TestModule() : super(moduleName: 'TestModule');
+
+  int sum(int a, int b) => callFunc('sum', [a, b]);
+}
+
 testModule() {
   group('module', () {
     Module module;
     setUp(() {
-      module = new Module(moduleName: 'TestModule', exportedFunctions: ['sum']);
+      module = new Module(moduleName: 'TestModule');
     });
     test('constructor', () {
       expect(() {
@@ -15,12 +21,13 @@ testModule() {
       }, throwsArgumentError);
     });
 
-    test('proxy', () {
-      expect(module.sum(1, 2), equals(3));
+    test('callFunc', () {
+      expect(module.callFunc('sum', [2, 2]), equals(4));
     });
 
-    test('callMethod', () {
-      expect(module.callMethod('sum', [2, 2]), equals(4));
+    test('extends', () {
+      var testModule = new TestModule();
+      expect(testModule.sum(2, 1), equals(3));
     });
 
     group('malloc', () {

@@ -9,40 +9,23 @@ class Pointer {
   const Pointer._(this.addr);
 }
 
-@proxy
 class Module {
   final js.JsObject module;
-  Map<Symbol, String> _exportedFunctions;
 
-  factory Module(
-      {String moduleName: 'Module',
-      js.JsObject context,
-      List<String> exportedFunctions: const []}) {
-    var m = (context == null ? js.context : context)[moduleName];
-    return new Module.from(m, exportedFunctions: exportedFunctions);
-  }
-
-  Module.from(this.module, {List<String> exportedFunctions: const []})
-      : _exportedFunctions = new Map<Symbol, String>.fromIterable(
-            exportedFunctions,
-            key: (String name) => new Symbol(name),
-            value: (String name) => name) {
+  Module({String moduleName: 'Module', js.JsObject context})
+      : module = (context == null ? js.context : context)[moduleName] {
     if (module == null) {
       throw new ArgumentError.notNull('module');
     }
   }
 
-  noSuchMethod(Invocation invocation) {
-    if (invocation.isMethod &&
-        _exportedFunctions.containsKey(invocation.memberName)) {
-      var name = _exportedFunctions[invocation.memberName];
-      return module.callMethod('_$name', invocation.positionalArguments);
-    } else {
-      super.noSuchMethod(invocation);
+  Module.from(this.module) {
+    if (module == null) {
+      throw new ArgumentError.notNull('module');
     }
   }
 
-  callMethod(String method, [List args]) => module.callMethod('_$method', args);
+  callFunc(String method, [List args]) => module.callMethod('_$method', args);
 
   Pointer heapString(String s) {
     if (s == null) {
