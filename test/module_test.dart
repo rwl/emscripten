@@ -1,5 +1,6 @@
 library emscripten.module.test;
 
+import 'dart:math';
 import 'package:test/test.dart';
 import 'package:emscripten/emscripten.dart';
 
@@ -8,6 +9,14 @@ class TestModule extends Module {
 
   int sum(int a, int b) => callFunc('sum', [a, b]);
 }
+
+const String str = 'the quick brown fox';
+
+final Random _r = new Random();
+
+int rint() => _r.nextInt(9) + 1;
+
+double rand() => _r.nextDouble();
 
 testModule() {
   group('module', () {
@@ -43,12 +52,16 @@ testModule() {
         Pointer ptr = module.heapDouble(3.14);
         expect(ptr.addr, isNonZero);
       });
+      test('strings', () {
+        var l = new List<String>.generate(rint(), (i) => str);
+        Pointer ptr = module.heapStrings(l);
+        expect(ptr.addr, isNonZero);
+      });
     });
 
     group('deref', () {
       group('free', () {
         test('string', () {
-          var str = 'the quick brown fox';
           Pointer ptr = module.heapString(str);
           expect(module.stringify(ptr), equals(str));
           module.heapString(str.toUpperCase());
@@ -66,7 +79,19 @@ testModule() {
           Pointer ptr = module.heapDouble(d);
           expect(module.derefDouble(ptr), equals(d));
           module.heapDouble(-d);
-          expect(module.derefDouble(ptr, true), isNot(equals(d)));
+          expect(module.derefDouble(ptr, false), isNot(equals(d)));
+        });
+        test('strings', () {
+          var n = rint();
+          var l = new List<String>.generate(n, (i) => str);
+          Pointer ptr = module.heapStrings(l);
+          List<String> l2 = module.derefStrings(ptr, n);
+          expect(l2, equals(l));
+
+          var l3 = new List<String>.generate(n, (i) => str.toUpperCase());
+          module.heapStrings(l3);
+          List<String> l4 = module.derefStrings(ptr, n, false);
+          expect(l4, isNot(equals(l)));
         });
       });
       group('keep', () {
@@ -87,6 +112,15 @@ testModule() {
           Pointer ptr = module.heapDouble(d);
           expect(module.derefDouble(ptr, false), equals(d));
           expect(module.derefDouble(ptr), equals(d));
+        });
+        test('strings', () {
+          var n = rint();
+          var l = new List<String>.generate(n, (i) => str);
+          Pointer ptr = module.heapStrings(l);
+          List<String> l2 = module.derefStrings(ptr, n, false);
+          expect(l2, equals(l));
+          List<String> l3 = module.derefStrings(ptr, n);
+          expect(l3, equals(l));
         });
       });
     });

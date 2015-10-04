@@ -27,6 +27,42 @@ class Module {
 
   callFunc(String method, [List args]) => module.callMethod('_$method', args);
 
+  Pointer heapStrings(List<String> l) {
+    if (l == null) {
+      throw new ArgumentError.notNull('l');
+    }
+    if (l.isEmpty) {
+      throw new ArgumentError.value(l, 'l', 'empty');
+    }
+    // Pointers are 32-bit
+    var ptr = malloc(l.length * Int32List.BYTES_PER_ELEMENT);
+    for (var i = 0; i < l.length; i++) {
+      var p = heapString(l[i]);
+      var addr = ptr.addr + (i * Int32List.BYTES_PER_ELEMENT);
+      module.callMethod('setValue', [addr, p.addr, '*']);
+    }
+    return ptr;
+  }
+
+  List<String> derefStrings(Pointer ptr, int n, [bool free = true]) {
+    if (ptr == null || ptr == Pointer.NIL) {
+      throw new ArgumentError.notNull('ptr');
+    }
+    if (n == null || n <= 0) {
+      throw new ArgumentError.value(n, 'n', 'non positive');
+    }
+    var l = new List<String>(n);
+    for (var i = 0; i < n; i++) {
+      var addr = ptr.addr + (i * Int32List.BYTES_PER_ELEMENT);
+      int p = module.callMethod('getValue', [addr, '*']);
+      l[i] = stringify(new Pointer._(p), free);
+    }
+    if (free) {
+      this.free(ptr);
+    }
+    return l;
+  }
+
   Pointer heapString(String s) {
     if (s == null) {
       return Pointer.NIL;
