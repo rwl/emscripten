@@ -3,6 +3,12 @@ library emscripten.module;
 import 'dart:js' as js;
 import 'dart:typed_data';
 
+class Pointer {
+  static final Pointer NIL = const Pointer._(0);
+  final int addr;
+  const Pointer._(this.addr);
+}
+
 @proxy
 class Module {
   final js.JsObject module;
@@ -27,7 +33,6 @@ class Module {
   }
 
   noSuchMethod(Invocation invocation) {
-    Symbol s;
     if (invocation.isMethod &&
         _exportedFunctions.containsKey(invocation.memberName)) {
       var name = _exportedFunctions[invocation.memberName];
@@ -39,58 +44,76 @@ class Module {
 
   callMethod(String method, [List args]) => module.callMethod('_$method', args);
 
-  int heapString(String s) {
+  Pointer heapString(String s) {
     if (s == null) {
-      return 0;
+      return Pointer.NIL;
     }
-    var ptr = module.callMethod('_malloc', [s.length + 1]);
-    module.callMethod('writeStringToMemory', [s, ptr]);
+    var ptr = malloc(s.length + 1);
+    module.callMethod('writeStringToMemory', [s, ptr.addr]);
     return ptr;
   }
 
-  int heapInt(int i) {
-    const i32 = Int32List.BYTES_PER_ELEMENT;
-    var ptr = module.callMethod('_malloc', [i32]);
-    module.callMethod('setValue', [ptr, i, 'i32']);
+  Pointer heapInt(int i) {
+    var ptr = malloc(Int32List.BYTES_PER_ELEMENT);
+    if (i != null) {
+      module.callMethod('setValue', [ptr.addr, i, 'i32']);
+    }
     return ptr;
   }
 
-  int heapDouble(double d) {
-    const bytes = Float64List.BYTES_PER_ELEMENT;
-    var ptr = module.callMethod('_malloc', [bytes]);
-    module.callMethod('setValue', [ptr, d, 'double']);
+  Pointer heapDouble(double d) {
+    var ptr = malloc(Float64List.BYTES_PER_ELEMENT);
+    if (d != null) {
+      module.callMethod('setValue', [ptr.addr, d, 'double']);
+    }
     return ptr;
   }
 
-  int derefInt(int ptr, [bool free = true]) {
-    var i = module.callMethod('getValue', [ptr, 'i32']);
+  int derefInt(Pointer ptr, [bool free = true]) {
+    if (ptr == null) {
+      throw new ArgumentError.notNull('ptr');
+    }
+    var i = module.callMethod('getValue', [ptr.addr, 'i32']);
     if (free) {
       this.free(ptr);
     }
     return i;
   }
 
-  double derefDouble(int ptr, [bool free = true]) {
-    var d = module.callMethod('getValue', [ptr, 'double']);
+  double derefDouble(Pointer ptr, [bool free = true]) {
+    if (ptr == null) {
+      throw new ArgumentError.notNull('ptr');
+    }
+    var d = module.callMethod('getValue', [ptr.addr, 'double']);
     if (free) {
       this.free(ptr);
     }
     return d;
   }
 
-  String stringify(int ptr, {/*int len,*/ bool free: true}) {
-    var args = [ptr];
-    /*if (len != null) {
-      args.add(len);
-    }*/
-    var s = module.callMethod('Pointer_stringify', args);
+  String stringify(Pointer ptr, [bool free = true]) {
+    if (ptr == null) {
+      throw new ArgumentError.notNull('ptr');
+    }
+    var s = module.callMethod('Pointer_stringify', [ptr.addr]);
     if (free) {
       this.free(ptr);
     }
     return s;
   }
 
-  void free(int ptr) {
-    module.callMethod('_free', [ptr]);
+  Pointer malloc(int numBytes) {
+    if (numBytes == null) {
+      throw new ArgumentError.notNull('numBytes');
+    }
+    var addr = module.callMethod('_malloc', [numBytes]);
+    return new Pointer._(addr);
+  }
+
+  void free(Pointer ptr) {
+    if (ptr == null) {
+      throw new ArgumentError.notNull('ptr');
+    }
+    module.callMethod('_free', [ptr.addr]);
   }
 }
