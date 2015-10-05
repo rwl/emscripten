@@ -43,52 +43,52 @@ testModule() {
 
     group('malloc', () {
       test('string', () {
-        Pointer ptr = module.heapString('the quick brown fox');
-        expect(ptr.addr, isNonZero);
+        int ptr = module.heapString('the quick brown fox');
+        expect(ptr, isNonZero);
       });
       test('int', () {
-        Pointer ptr = module.heapInt(42);
-        expect(ptr.addr, isNonZero);
+        int ptr = module.heapInt(42);
+        expect(ptr, isNonZero);
       });
       test('double', () {
-        Pointer ptr = module.heapDouble(3.14);
-        expect(ptr.addr, isNonZero);
+        int ptr = module.heapDouble(3.14);
+        expect(ptr, isNonZero);
       });
       test('strings', () {
         var l = new List<String>.generate(rint(), (i) => str);
-        Pointer ptr = module.heapStrings(l);
-        expect(ptr.addr, isNonZero);
+        int ptr = module.heapStrings(l);
+        expect(ptr, isNonZero);
       });
       test('doubles', () {
         var l = new Float64List(rint());
-        Pointer ptr = module.heapDoubles(l);
-        expect(ptr.addr, isNonZero);
+        int ptr = module.heapDoubles(l);
+        expect(ptr, isNonZero);
       });
       test('ints', () {
         var l = new Int32List(rint());
-        Pointer ptr = module.heapInts(l);
-        expect(ptr.addr, isNonZero);
+        int ptr = module.heapInts(l);
+        expect(ptr, isNonZero);
       });
     });
 
     group('deref', () {
       group('free', () {
         test('string', () {
-          Pointer ptr = module.heapString(str);
+          int ptr = module.heapString(str);
           expect(module.stringify(ptr), equals(str));
           module.heapString(str.toUpperCase());
           expect(module.stringify(ptr, false), isNot(equals(str)));
         });
         test('int', () {
           var i = 42;
-          Pointer ptr = module.heapInt(i);
+          int ptr = module.heapInt(i);
           expect(module.derefInt(ptr), equals(i));
           module.heapInt(-i);
           expect(module.derefInt(ptr, false), isNot(equals(i)));
         });
         test('double', () {
           var d = 3.14;
-          Pointer ptr = module.heapDouble(d);
+          int ptr = module.heapDouble(d);
           expect(module.derefDouble(ptr), equals(d));
           module.heapDouble(-d);
           expect(module.derefDouble(ptr, false), isNot(equals(d)));
@@ -96,7 +96,7 @@ testModule() {
         test('strings', () {
           var n = rint();
           var l = new List<String>.generate(n, (i) => str);
-          Pointer ptr = module.heapStrings(l);
+          int ptr = module.heapStrings(l);
           List<String> l2 = module.derefStrings(ptr, n);
           expect(l2, equals(l));
 
@@ -111,7 +111,7 @@ testModule() {
           for (var i = 0; i < n; i++) {
             l[i] = rand();
           }
-          Pointer ptr = module.heapDoubles(l);
+          int ptr = module.heapDoubles(l);
           Float64List l2 = module.derefDoubles(ptr, n);
           expect(l2, equals(l));
 
@@ -129,7 +129,7 @@ testModule() {
           for (var i = 0; i < n; i++) {
             l[i] = rint();
           }
-          Pointer ptr = module.heapInts(l);
+          int ptr = module.heapInts(l);
           Int32List l2 = module.derefInts(ptr, n);
           expect(l2, equals(l));
 
@@ -145,26 +145,26 @@ testModule() {
       group('keep', () {
         test('string', () {
           var str = 'the quick brown fox';
-          Pointer ptr = module.heapString(str);
+          int ptr = module.heapString(str);
           expect(module.stringify(ptr, false), equals(str));
           expect(module.stringify(ptr), equals(str));
         });
         test('int', () {
           var i = 42;
-          Pointer ptr = module.heapInt(i);
+          int ptr = module.heapInt(i);
           expect(module.derefInt(ptr, false), equals(i));
           expect(module.derefInt(ptr), equals(i));
         });
         test('double', () {
           var d = 3.14;
-          Pointer ptr = module.heapDouble(d);
+          int ptr = module.heapDouble(d);
           expect(module.derefDouble(ptr, false), equals(d));
           expect(module.derefDouble(ptr), equals(d));
         });
         test('strings', () {
           var n = rint();
           var l = new List<String>.generate(n, (i) => str);
-          Pointer ptr = module.heapStrings(l);
+          int ptr = module.heapStrings(l);
           List<String> l2 = module.derefStrings(ptr, n, false);
           expect(l2, equals(l));
           List<String> l3 = module.derefStrings(ptr, n);
@@ -176,9 +176,10 @@ testModule() {
           for (var i = 0; i < n; i++) {
             l[i] = rand();
           }
-          Pointer ptr = module.heapDoubles(l);
+          int ptr = module.heapDoubles(l);
           Float64List l2 = module.derefDoubles(ptr, n, false);
           expect(l2, equals(l));
+          // TODO: Check values are copied
           Float64List l3 = module.derefDoubles(ptr, n);
           expect(l3, equals(l));
         });
@@ -188,9 +189,10 @@ testModule() {
           for (var i = 0; i < n; i++) {
             l[i] = rint();
           }
-          Pointer ptr = module.heapInts(l);
+          int ptr = module.heapInts(l);
           Int32List l2 = module.derefInts(ptr, n, false);
           expect(l2, equals(l));
+          // TODO: Check values are copied
           Int32List l3 = module.derefInts(ptr, n);
           expect(l3, equals(l));
         });
@@ -198,8 +200,7 @@ testModule() {
     });
 
     test('malloc', () {
-      expect(module.malloc(4), isNotNull);
-      expect(module.malloc(4).addr, isNonZero);
+      expect(module.malloc(4), isNonZero);
     });
 
     test('free', () {
