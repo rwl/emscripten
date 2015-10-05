@@ -31,17 +31,17 @@ class Module {
 
   callFunc(String method, [List args]) => module.callMethod('_$method', args);
 
-  Pointer heapStrings(List<String> l) {
-    if (l == null) {
-      throw new ArgumentError.notNull('l');
+  Pointer heapStrings(List<String> list) {
+    if (list == null) {
+      throw new ArgumentError.notNull('list');
     }
-    if (l.isEmpty) {
-      throw new ArgumentError.value(l, 'l', 'empty');
+    if (list.isEmpty) {
+      throw new ArgumentError.value(list, 'list', 'empty');
     }
 
-    var ptr = malloc(l.length * SIZEOF_PTR);
-    for (var i = 0; i < l.length; i++) {
-      var p = heapString(l[i]);
+    var ptr = malloc(list.length * SIZEOF_PTR);
+    for (var i = 0; i < list.length; i++) {
+      var p = heapString(list[i]);
       var addr = ptr.addr + (i * SIZEOF_PTR);
       module.callMethod('setValue', [addr, p.addr, '*']);
     }
@@ -55,30 +55,32 @@ class Module {
     if (n == null || n <= 0) {
       throw new ArgumentError.value(n, 'n', 'non positive');
     }
-    var l = new List<String>(n);
+    var list = new List<String>(n);
     for (var i = 0; i < n; i++) {
       var addr = ptr.addr + (i * SIZEOF_PTR);
       int p = module.callMethod('getValue', [addr, '*']);
-      l[i] = stringify(new Pointer._(p), free);
+      list[i] = stringify(new Pointer._(p), free);
     }
     if (free) {
       this.free(ptr);
     }
-    return l;
+    return list;
   }
 
-  Pointer heapDoubles(Float64List l) {
-    if (l == null) {
-      throw new ArgumentError.notNull('l');
+  /// Requires `--post-js packages/emscripten/post.js` on compilation.
+  Pointer heapDoubles(Float64List list) {
+    if (list == null) {
+      throw new ArgumentError.notNull('list');
     }
-    if (l.isEmpty) {
-      throw new ArgumentError.value(l, 'l', 'empty');
+    if (list.isEmpty) {
+      throw new ArgumentError.value(list, 'list', 'empty');
     }
-    var ptr = malloc(l.lengthInBytes);
-    module.callMethod('setTypedData', [l, ptr.addr]);
+    var ptr = malloc(list.lengthInBytes);
+    module.callMethod('setTypedData', [list, ptr.addr]);
     return ptr;
   }
 
+  /// Requires `--post-js packages/emscripten/post.js` on compilation.
   Float64List derefDoubles(Pointer ptr, int n, [bool free = true]) {
     if (ptr == null || ptr == Pointer.NIL) {
       throw new ArgumentError.notNull('ptr');
@@ -86,25 +88,28 @@ class Module {
     if (n == null || n <= 0) {
       throw new ArgumentError.value(n, 'n', 'non positive');
     }
-    var l = module.callMethod('getFloat64Array', [ptr.addr, n]);
+    Float64List list = module.callMethod('getFloat64Array', [ptr.addr, n]);
+    list = new Float64List.fromList(list);
     if (free) {
       this.free(ptr);
     }
-    return l;
+    return list;
   }
 
-  Pointer heapInts(Int32List l) {
-    if (l == null) {
-      throw new ArgumentError.notNull('l');
+  /// Requires `--post-js packages/emscripten/post.js` on compilation.
+  Pointer heapInts(Int32List list) {
+    if (list == null) {
+      throw new ArgumentError.notNull('list');
     }
-    if (l.isEmpty) {
-      throw new ArgumentError.value(l, 'l', 'empty');
+    if (list.isEmpty) {
+      throw new ArgumentError.value(list, 'list', 'empty');
     }
-    var ptr = malloc(l.lengthInBytes);
-    module.callMethod('setTypedData', [l, ptr.addr]);
+    var ptr = malloc(list.lengthInBytes);
+    module.callMethod('setTypedData', [list, ptr.addr]);
     return ptr;
   }
 
+  /// Requires `--post-js packages/emscripten/post.js` on compilation.
   Int32List derefInts(Pointer ptr, int n, [bool free = true]) {
     if (ptr == null || ptr == Pointer.NIL) {
       throw new ArgumentError.notNull('ptr');
@@ -112,11 +117,12 @@ class Module {
     if (n == null || n <= 0) {
       throw new ArgumentError.value(n, 'n', 'non positive');
     }
-    var l = module.callMethod('getInt32Array', [ptr.addr, n]);
+    Int32List list = module.callMethod('getInt32Array', [ptr.addr, n]);
+    list = new Int32List.fromList(list);
     if (free) {
       this.free(ptr);
     }
-    return l;
+    return list;
   }
 
   Pointer heapString(String s) {
@@ -128,7 +134,7 @@ class Module {
     return ptr;
   }
 
-  Pointer heapInt(int i) {
+  Pointer heapInt([int i = 0]) {
     var ptr = malloc(SIZEOF_INT);
     if (i != null) {
       module.callMethod('setValue', [ptr.addr, i, 'i32']);
@@ -136,7 +142,7 @@ class Module {
     return ptr;
   }
 
-  Pointer heapDouble(double d) {
+  Pointer heapDouble([double d = 0.0]) {
     var ptr = malloc(SIZEOF_DBL);
     if (d != null) {
       module.callMethod('setValue', [ptr.addr, d, 'double']);
