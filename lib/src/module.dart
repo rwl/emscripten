@@ -9,6 +9,10 @@ class Pointer {
   const Pointer._(this.addr);
 }
 
+const int SIZEOF_PTR = Int32List.BYTES_PER_ELEMENT; // Pointers are 32-bit
+const int SIZEOF_INT = Int32List.BYTES_PER_ELEMENT;
+const int SIZEOF_DBL = Float64List.BYTES_PER_ELEMENT;
+
 class Module {
   final js.JsObject module;
 
@@ -34,11 +38,11 @@ class Module {
     if (l.isEmpty) {
       throw new ArgumentError.value(l, 'l', 'empty');
     }
-    // Pointers are 32-bit
-    var ptr = malloc(l.length * Int32List.BYTES_PER_ELEMENT);
+
+    var ptr = malloc(l.length * SIZEOF_PTR);
     for (var i = 0; i < l.length; i++) {
       var p = heapString(l[i]);
-      var addr = ptr.addr + (i * Int32List.BYTES_PER_ELEMENT);
+      var addr = ptr.addr + (i * SIZEOF_PTR);
       module.callMethod('setValue', [addr, p.addr, '*']);
     }
     return ptr;
@@ -53,10 +57,36 @@ class Module {
     }
     var l = new List<String>(n);
     for (var i = 0; i < n; i++) {
-      var addr = ptr.addr + (i * Int32List.BYTES_PER_ELEMENT);
+      var addr = ptr.addr + (i * SIZEOF_PTR);
       int p = module.callMethod('getValue', [addr, '*']);
       l[i] = stringify(new Pointer._(p), free);
     }
+    if (free) {
+      this.free(ptr);
+    }
+    return l;
+  }
+
+  Pointer heapDoubles(Float64List l) {
+    if (l == null) {
+      throw new ArgumentError.notNull('l');
+    }
+    if (l.isEmpty) {
+      throw new ArgumentError.value(l, 'l', 'empty');
+    }
+    var ptr = malloc(l.lengthInBytes);
+    module.callMethod('setTypedData', [l, ptr.addr]);
+    return ptr;
+  }
+
+  Float64List derefDoubles(Pointer ptr, int n, [bool free = true]) {
+    if (ptr == null || ptr == Pointer.NIL) {
+      throw new ArgumentError.notNull('ptr');
+    }
+    if (n == null || n <= 0) {
+      throw new ArgumentError.value(n, 'n', 'non positive');
+    }
+    var l = module.callMethod('getFloat64Array', [ptr.addr, n]);
     if (free) {
       this.free(ptr);
     }
@@ -73,7 +103,7 @@ class Module {
   }
 
   Pointer heapInt(int i) {
-    var ptr = malloc(Int32List.BYTES_PER_ELEMENT);
+    var ptr = malloc(SIZEOF_INT);
     if (i != null) {
       module.callMethod('setValue', [ptr.addr, i, 'i32']);
     }
@@ -81,7 +111,7 @@ class Module {
   }
 
   Pointer heapDouble(double d) {
-    var ptr = malloc(Float64List.BYTES_PER_ELEMENT);
+    var ptr = malloc(SIZEOF_DBL);
     if (d != null) {
       module.callMethod('setValue', [ptr.addr, d, 'double']);
     }

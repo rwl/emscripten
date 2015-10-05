@@ -1,6 +1,8 @@
 library emscripten.module.test;
 
 import 'dart:math';
+import 'dart:typed_data';
+
 import 'package:test/test.dart';
 import 'package:emscripten/emscripten.dart';
 
@@ -57,6 +59,11 @@ testModule() {
         Pointer ptr = module.heapStrings(l);
         expect(ptr.addr, isNonZero);
       });
+      test('doubles', () {
+        var l = new Float64List(rint());
+        Pointer ptr = module.heapDoubles(l);
+        expect(ptr.addr, isNonZero);
+      });
     });
 
     group('deref', () {
@@ -93,6 +100,24 @@ testModule() {
           List<String> l4 = module.derefStrings(ptr, n, false);
           expect(l4, isNot(equals(l)));
         });
+        test('doubles', () {
+          var n = rint();
+          var l = new Float64List(n);
+          for (var i = 0; i < n; i++) {
+            l[i] = rand();
+          }
+          Pointer ptr = module.heapDoubles(l);
+          Float64List l2 = module.derefDoubles(ptr, n);
+          expect(l2, equals(l));
+
+          var l3 = new Float64List(n);
+          for (var i = 0; i < n; i++) {
+            l3[i] = -l[i];
+          }
+          module.heapDoubles(l3);
+          Float64List l4 = module.derefDoubles(ptr, n, false);
+          expect(l4, isNot(equals(l)));
+        });
       });
       group('keep', () {
         test('string', () {
@@ -120,6 +145,18 @@ testModule() {
           List<String> l2 = module.derefStrings(ptr, n, false);
           expect(l2, equals(l));
           List<String> l3 = module.derefStrings(ptr, n);
+          expect(l3, equals(l));
+        });
+        test('doubles', () {
+          var n = rint();
+          var l = new Float64List(n);
+          for (var i = 0; i < n; i++) {
+            l[i] = rand();
+          }
+          Pointer ptr = module.heapDoubles(l);
+          Float64List l2 = module.derefDoubles(ptr, n, false);
+          expect(l2, equals(l));
+          Float64List l3 = module.derefDoubles(ptr, n);
           expect(l3, equals(l));
         });
       });
