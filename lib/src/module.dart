@@ -93,6 +93,32 @@ class Module {
     return l;
   }
 
+  Pointer heapInts(Int32List l) {
+    if (l == null) {
+      throw new ArgumentError.notNull('l');
+    }
+    if (l.isEmpty) {
+      throw new ArgumentError.value(l, 'l', 'empty');
+    }
+    var ptr = malloc(l.lengthInBytes);
+    module.callMethod('setTypedData', [l, ptr.addr]);
+    return ptr;
+  }
+
+  Int32List derefInts(Pointer ptr, int n, [bool free = true]) {
+    if (ptr == null || ptr == Pointer.NIL) {
+      throw new ArgumentError.notNull('ptr');
+    }
+    if (n == null || n <= 0) {
+      throw new ArgumentError.value(n, 'n', 'non positive');
+    }
+    var l = module.callMethod('getInt32Array', [ptr.addr, n]);
+    if (free) {
+      this.free(ptr);
+    }
+    return l;
+  }
+
   Pointer heapString(String s) {
     if (s == null) {
       return Pointer.NIL;

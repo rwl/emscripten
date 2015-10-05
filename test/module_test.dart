@@ -64,6 +64,11 @@ testModule() {
         Pointer ptr = module.heapDoubles(l);
         expect(ptr.addr, isNonZero);
       });
+      test('ints', () {
+        var l = new Int32List(rint());
+        Pointer ptr = module.heapInts(l);
+        expect(ptr.addr, isNonZero);
+      });
     });
 
     group('deref', () {
@@ -118,6 +123,24 @@ testModule() {
           Float64List l4 = module.derefDoubles(ptr, n, false);
           expect(l4, isNot(equals(l)));
         });
+        test('ints', () {
+          var n = rint();
+          var l = new Int32List(n);
+          for (var i = 0; i < n; i++) {
+            l[i] = rint();
+          }
+          Pointer ptr = module.heapInts(l);
+          Int32List l2 = module.derefInts(ptr, n);
+          expect(l2, equals(l));
+
+          var l3 = new Int32List(n);
+          for (var i = 0; i < n; i++) {
+            l3[i] = -l[i];
+          }
+          module.heapInts(l3);
+          Int32List l4 = module.derefInts(ptr, n, false);
+          expect(l4, isNot(equals(l)));
+        });
       });
       group('keep', () {
         test('string', () {
@@ -157,6 +180,18 @@ testModule() {
           Float64List l2 = module.derefDoubles(ptr, n, false);
           expect(l2, equals(l));
           Float64List l3 = module.derefDoubles(ptr, n);
+          expect(l3, equals(l));
+        });
+        test('ints', () {
+          var n = rint();
+          var l = new Int32List(n);
+          for (var i = 0; i < n; i++) {
+            l[i] = rint();
+          }
+          Pointer ptr = module.heapInts(l);
+          Int32List l2 = module.derefInts(ptr, n, false);
+          expect(l2, equals(l));
+          Int32List l3 = module.derefInts(ptr, n);
           expect(l3, equals(l));
         });
       });
