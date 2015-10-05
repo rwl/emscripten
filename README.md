@@ -1,7 +1,7 @@
 # Emscripten
 
 Access [Emscripten](http://emscripten.org) modules from
-[Dart](https://dartlang.org).
+[Dart](http://dartlang.org).
 
 ## Usage
 
