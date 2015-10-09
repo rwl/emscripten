@@ -17,7 +17,7 @@ import 'dart:typed_data';
 class FS {
   final js.JsObject _module;
 
-  FS([js.JsObject context, String moduleName = 'FS'])
+  FS({js.JsObject context, String moduleName: 'FS'})
       : _module = (context == null ? js.context : context)[moduleName];
 
   /// Converts a major and minor number into a single unique integer. This
@@ -199,15 +199,37 @@ class FS {
 
   /// Reads the entire file at [path] and returns it as a [String] (encoding
   /// is `utf8`), or as a new [Uint8List] buffer (encoding is `binary`).
-  readFile(String path, Map<String, String> opts) {
-    var _opts = new js.JsObject.jsify(opts);
-    return _module.callMethod('readFile', [path, _opts]);
+  readFile(String path,
+      [Map<String, String> opts = const {'encoding': 'utf8'}]) {
+    var args = [path];
+    if (opts != null) {
+      args.add(new js.JsObject.jsify(opts));
+    }
+    return _module.callMethod('readFile', args);
   }
 
   /// Writes the entire contents of [data] to the file at [path].
-  void writeFile(String path, data, Map<String, String> opts) {
-    var _opts = new js.JsObject.jsify(opts);
-    _module.callMethod('readFile', [path, data, _opts]);
+  void writeFile(String path, String data, [Map<String, String> opts]) {
+    var args = [path, data];
+    if (opts == null) {
+      opts = {'encoding': 'utf8'};
+    } else if (!opts.containsKey('encoding')) {
+      opts['encoding'] = 'utf8';
+    }
+    args.add(new js.JsObject.jsify(opts));
+    _module.callMethod('writeFile', args);
+  }
+
+  void writeBinaryFile(String path, TypedData data,
+      [Map<String, String> opts = const {'encoding': 'binary'}]) {
+    var args = [path, data];
+    if (opts == null) {
+      opts = {'encoding': 'binary'};
+    } else if (!opts.containsKey('encoding')) {
+      opts['encoding'] = 'binary';
+    }
+    args.add(new js.JsObject.jsify(opts));
+    _module.callMethod('writeFile', args);
   }
 
   /// Creates a file that will be loaded lazily on first access from a given
