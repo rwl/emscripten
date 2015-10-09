@@ -8,22 +8,23 @@ const int SIZEOF_INT = Int32List.BYTES_PER_ELEMENT;
 const int SIZEOF_DBL = Float64List.BYTES_PER_ELEMENT;
 
 class Module {
-  final js.JsObject module;
+  final js.JsObject _module;
 
   Module({String moduleName: 'Module', js.JsObject context})
-      : module = (context == null ? js.context : context)[moduleName] {
-    if (module == null) {
+      : _module = (context == null ? js.context : context)[moduleName] {
+    if (_module == null) {
       throw new ArgumentError.notNull('module');
     }
   }
 
-  Module.from(this.module) {
-    if (module == null) {
+  Module.from(this._module) {
+    if (_module == null) {
       throw new ArgumentError.notNull('module');
     }
   }
 
-  callFunc(String method, [List args]) => module.callMethod('_$method', args);
+  /// Prepends [name] with an `_` before calling module method with [args].
+  callFunc(String name, [List args]) => _module.callMethod('_$name', args);
 
   int heapStrings(List<String> list) {
     if (list == null) {
@@ -37,7 +38,7 @@ class Module {
     for (var i = 0; i < list.length; i++) {
       var p = heapString(list[i]);
       var addr = ptr + (i * SIZEOF_PTR);
-      module.callMethod('setValue', [addr, p, '*']);
+      _module.callMethod('setValue', [addr, p, '*']);
     }
     return ptr;
   }
@@ -52,13 +53,28 @@ class Module {
     var list = new List<String>(n);
     for (var i = 0; i < n; i++) {
       var addr = ptr + (i * SIZEOF_PTR);
-      int p = module.callMethod('getValue', [addr, '*']);
+      int p = _module.callMethod('getValue', [addr, '*']);
       list[i] = stringify(p, free);
     }
     if (free) {
       this.free(ptr);
     }
     return list;
+  }
+
+  void freeStrings(int ptr, int n) {
+    if (ptr == null || ptr == 0) {
+      throw new ArgumentError.notNull('ptr');
+    }
+    if (n == null || n <= 0) {
+      throw new ArgumentError.value(n, 'n', 'non positive');
+    }
+    for (var i = 0; i < n; i++) {
+      var addr = ptr + (i * SIZEOF_PTR);
+      int p = _module.callMethod('getValue', [addr, '*']);
+      free(ptr);
+    }
+    free(ptr);
   }
 
   /// Requires `--post-js packages/emscripten/post.js` on compilation.
@@ -70,7 +86,7 @@ class Module {
       throw new ArgumentError.value(list, 'list', 'empty');
     }
     var ptr = malloc(list.lengthInBytes);
-    module.callMethod('setTypedData', [list, ptr]);
+    _module.callMethod('setTypedData', [list, ptr]);
     return ptr;
   }
 
@@ -82,7 +98,7 @@ class Module {
     if (n == null || n <= 0) {
       throw new ArgumentError.value(n, 'n', 'non positive');
     }
-    Float64List list = module.callMethod('getFloat64Array', [ptr, n]);
+    Float64List list = _module.callMethod('getFloat64Array', [ptr, n]);
     list = new Float64List.fromList(list);
     if (free) {
       this.free(ptr);
@@ -99,7 +115,7 @@ class Module {
       throw new ArgumentError.value(list, 'list', 'empty');
     }
     var ptr = malloc(list.lengthInBytes);
-    module.callMethod('setTypedData', [list, ptr]);
+    _module.callMethod('setTypedData', [list, ptr]);
     return ptr;
   }
 
@@ -111,7 +127,7 @@ class Module {
     if (n == null || n <= 0) {
       throw new ArgumentError.value(n, 'n', 'non positive');
     }
-    Int32List list = module.callMethod('getInt32Array', [ptr, n]);
+    Int32List list = _module.callMethod('getInt32Array', [ptr, n]);
     list = new Int32List.fromList(list);
     if (free) {
       this.free(ptr);
@@ -124,14 +140,14 @@ class Module {
       return 0;
     }
     var ptr = malloc(s.length + 1);
-    module.callMethod('writeStringToMemory', [s, ptr]);
+    _module.callMethod('writeStringToMemory', [s, ptr]);
     return ptr;
   }
 
   int heapInt([int i = 0]) {
     var ptr = malloc(SIZEOF_INT);
     if (i != null) {
-      module.callMethod('setValue', [ptr, i, 'i32']);
+      _module.callMethod('setValue', [ptr, i, 'i32']);
     }
     return ptr;
   }
@@ -139,7 +155,7 @@ class Module {
   int heapDouble([double d = 0.0]) {
     var ptr = malloc(SIZEOF_DBL);
     if (d != null) {
-      module.callMethod('setValue', [ptr, d, 'double']);
+      _module.callMethod('setValue', [ptr, d, 'double']);
     }
     return ptr;
   }
@@ -148,29 +164,33 @@ class Module {
     if (ptr == null) {
       throw new ArgumentError.notNull('ptr');
     }
-    var i = module.callMethod('getValue', [ptr, 'i32']);
+    var i = _module.callMethod('getValue', [ptr, 'i32']);
     if (free) {
       this.free(ptr);
     }
-    return i;
+    return i.toInt();
   }
 
   double derefDouble(int ptr, [bool free = true]) {
     if (ptr == null) {
       throw new ArgumentError.notNull('ptr');
     }
-    var d = module.callMethod('getValue', [ptr, 'double']);
+    var d = _module.callMethod('getValue', [ptr, 'double']);
     if (free) {
       this.free(ptr);
     }
-    return d;
+    return d.toDouble();
   }
 
-  String stringify(int ptr, [bool free = true]) {
+  String stringify(int ptr, [bool free = true, int len]) {
     if (ptr == null) {
       throw new ArgumentError.notNull('ptr');
     }
-    var s = module.callMethod('Pointer_stringify', [ptr]);
+    var args = [ptr];
+    if (len != null) {
+      args.add(len);
+    }
+    var s = _module.callMethod('Pointer_stringify', args);
     if (free) {
       this.free(ptr);
     }
@@ -181,13 +201,13 @@ class Module {
     if (numBytes == null) {
       throw new ArgumentError.notNull('numBytes');
     }
-    return module.callMethod('_malloc', [numBytes]);
+    return _module.callMethod('_malloc', [numBytes]);
   }
 
   void free(int ptr) {
     if (ptr == null) {
       throw new ArgumentError.notNull('ptr');
     }
-    module.callMethod('_free', [ptr]);
+    _module.callMethod('_free', [ptr]);
   }
 }

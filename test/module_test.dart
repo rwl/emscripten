@@ -104,6 +104,7 @@ testModule() {
           module.heapStrings(l3);
           List<String> l4 = module.derefStrings(ptr, n, false);
           expect(l4, isNot(equals(l)));
+          // TODO: test `len` arg
         });
         test('doubles', () {
           var n = rint();
@@ -208,5 +209,6 @@ testModule() {
       expect(() => module.free(ptr), returnsNormally);
       expect(() => module.free(ptr), throws);
     });
+    // TODO: test freeStrings
   });
 }
