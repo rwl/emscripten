@@ -3,12 +3,22 @@ library emscripten.module;
 import 'dart:js' as js;
 import 'dart:typed_data';
 
+import 'package:complex/complex.dart';
+
 const int SIZEOF_PTR = Int32List.BYTES_PER_ELEMENT; // Pointers are 32-bit
 const int SIZEOF_INT = Int32List.BYTES_PER_ELEMENT;
 const int SIZEOF_DBL = Float64List.BYTES_PER_ELEMENT;
 
 class Module {
   final js.JsObject _module;
+
+  Module.func(String funcName, [js.JsObject context])
+      : _module =
+            (context == null ? js.context : context).callMethod(funcName) {
+    if (_module == null) {
+      throw new ArgumentError.notNull('module');
+    }
+  }
 
   Module({String moduleName: 'Module', js.JsObject context})
       : _module = (context == null ? js.context : context)[moduleName] {
@@ -22,6 +32,8 @@ class Module {
       throw new ArgumentError.notNull('module');
     }
   }
+
+  js.JsObject get module => _module;
 
   /// Prepends [name] with an `_` before calling module method with [args].
   callFunc(String name, [List args]) => _module.callMethod('_$name', args);
@@ -72,7 +84,7 @@ class Module {
     for (var i = 0; i < n; i++) {
       var addr = ptr + (i * SIZEOF_PTR);
       int p = _module.callMethod('getValue', [addr, '*']);
-      free(ptr);
+      free(p);
     }
     free(ptr);
   }
@@ -209,5 +221,60 @@ class Module {
       throw new ArgumentError.notNull('ptr');
     }
     _module.callMethod('_free', [ptr]);
+  }
+
+  /// Requires `packages/emscripten/complex.c` to be compiled and exported.
+  int heapComplexList(List<Complex> list) {
+    int n = list.length;
+    var clist = new Float64List(n * 2);
+    for (var i = 0; i < n; i++) {
+      clist[2 * i] = list[i].real;
+      clist[2 * i + 1] = list[i].imaginary;
+    }
+    int p_clist = heapDoubles(clist);
+    int ptr = callFunc('heap_complex_doubles', [p_clist, n]);
+    free(p_clist);
+    return ptr;
+  }
+
+  /// Requires `packages/emscripten/complex.c` to be compiled and exported.
+  List<Complex> derefComplexList(int ptr, int n, [bool free = true]) {
+    if (ptr == null) {
+      throw new ArgumentError.notNull('ptr');
+    }
+    int p_clist = callFunc('deref_complex_doubles', [ptr, n]);
+
+    var list = derefDoubles(p_clist, 2 * n, true);
+    var clist = new List<Complex>(n);
+    for (var i = 0; i < n; i++) {
+      var re = list[2 * i];
+      var im = list[2 * i + 1];
+      clist[i] = new Complex(re, im);
+    }
+    if (free) {
+      this.free(ptr);
+    }
+    return clist;
+  }
+
+  /// Requires `packages/emscripten/complex.c` to be compiled and exported.
+  int heapComplex([Complex val]) {
+    if (val == null) {
+      val = Complex.ZERO;
+    }
+    return callFunc('heap_complex_double', [val.real, val.imaginary]);
+  }
+
+  /// Requires `packages/emscripten/complex.c` to be compiled and exported.
+  Complex derefComplex(int ptr, [bool free = true]) {
+    if (ptr == null) {
+      throw new ArgumentError.notNull('ptr');
+    }
+    var re = callFunc('deref_complex_double_real', [ptr]);
+    var im = callFunc('deref_complex_double_imag', [ptr]);
+    if (free) {
+      this.free(ptr);
+    }
+    return new Complex(re.toDouble(), im.toDouble());
   }
 }

@@ -3,6 +3,8 @@ version: 0.0.3
 author: Richard Lincoln <r.w.lincoln@gmail.com>
 description: Access Emscripten modules from Dart
 homepage: https://github.com/rwl/emscripten
+dependencies:
+  complex: any
 dev_dependencies:
   browser: any
   test: any

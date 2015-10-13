@@ -5400,6 +5400,160 @@ function _sum($a,$b) {
  $4 = (($2) + ($3))|0;
  STACKTOP = sp;return ($4|0);
 }
+function _heap_complex_double($re,$im) {
+ $re = +$re;
+ $im = +$im;
+ var $0 = 0.0, $1 = 0.0, $10 = 0, $2 = 0, $3 = 0.0, $4 = 0.0, $5 = 0.0, $6 = 0.0, $7 = 0.0, $8 = 0, $9 = 0, $c = 0, label = 0, sp = 0;
+ sp = STACKTOP;
+ STACKTOP = STACKTOP + 32|0; if ((STACKTOP|0) >= (STACK_MAX|0)) abort();
+ $0 = $re;
+ $1 = $im;
+ $2 = (_malloc(16)|0);
+ $c = $2;
+ $3 = $0;
+ $4 = $1;
+ $5 = $4 * 0.0;
+ $6 = $4 * 1.0;
+ $7 = $3 + $5;
+ $8 = $c;
+ $9 = ((($8)) + 8|0);
+ HEAPF64[$8>>3] = $7;
+ HEAPF64[$9>>3] = $6;
+ $10 = $c;
+ STACKTOP = sp;return ($10|0);
+}
+function _deref_complex_double_real($c) {
+ $c = $c|0;
+ var $0 = 0, $1 = 0, $2 = 0.0, label = 0, sp = 0;
+ sp = STACKTOP;
+ STACKTOP = STACKTOP + 16|0; if ((STACKTOP|0) >= (STACK_MAX|0)) abort();
+ $0 = $c;
+ $1 = $0;
+ $2 = +HEAPF64[$1>>3];
+ STACKTOP = sp;return (+$2);
+}
+function _deref_complex_double_imag($c) {
+ $c = $c|0;
+ var $0 = 0, $1 = 0, $2 = 0, $3 = 0.0, $4 = 0, $5 = 0.0, $6 = 0, $7 = 0, $8 = 0.0, label = 0, sp = 0;
+ sp = STACKTOP;
+ STACKTOP = STACKTOP + 32|0; if ((STACKTOP|0) >= (STACK_MAX|0)) abort();
+ $1 = sp;
+ $0 = $c;
+ $2 = $0;
+ $3 = +HEAPF64[$2>>3];
+ $4 = ((($2)) + 8|0);
+ $5 = +HEAPF64[$4>>3];
+ $6 = ((($1)) + 8|0);
+ HEAPF64[$1>>3] = $3;
+ HEAPF64[$6>>3] = $5;
+ $7 = ((($1)) + 8|0);
+ $8 = +HEAPF64[$7>>3];
+ STACKTOP = sp;return (+$8);
+}
+function _heap_complex_doubles($vals,$n) {
+ $vals = $vals|0;
+ $n = $n|0;
+ var $0 = 0, $1 = 0, $10 = 0, $11 = 0, $12 = 0.0, $13 = 0, $14 = 0, $15 = 0, $16 = 0, $17 = 0, $18 = 0.0, $19 = 0.0, $2 = 0, $20 = 0.0, $21 = 0.0, $22 = 0, $23 = 0, $24 = 0, $25 = 0, $26 = 0;
+ var $27 = 0, $28 = 0, $3 = 0, $4 = 0, $5 = 0, $6 = 0, $7 = 0, $8 = 0, $9 = 0, $c = 0, $i = 0, label = 0, sp = 0;
+ sp = STACKTOP;
+ STACKTOP = STACKTOP + 16|0; if ((STACKTOP|0) >= (STACK_MAX|0)) abort();
+ $0 = $vals;
+ $1 = $n;
+ $2 = $1;
+ $3 = $2<<4;
+ $4 = (_malloc($3)|0);
+ $c = $4;
+ $i = 0;
+ while(1) {
+  $5 = $i;
+  $6 = $1;
+  $7 = ($5|0)<($6|0);
+  if (!($7)) {
+   break;
+  }
+  $8 = $i;
+  $9 = $8<<1;
+  $10 = $0;
+  $11 = (($10) + ($9<<3)|0);
+  $12 = +HEAPF64[$11>>3];
+  $13 = $i;
+  $14 = $13<<1;
+  $15 = (($14) + 1)|0;
+  $16 = $0;
+  $17 = (($16) + ($15<<3)|0);
+  $18 = +HEAPF64[$17>>3];
+  $19 = $18 * 0.0;
+  $20 = $18 * 1.0;
+  $21 = $12 + $19;
+  $22 = $i;
+  $23 = $c;
+  $24 = (($23) + ($22<<4)|0);
+  $25 = ((($24)) + 8|0);
+  HEAPF64[$24>>3] = $21;
+  HEAPF64[$25>>3] = $20;
+  $26 = $i;
+  $27 = (($26) + 1)|0;
+  $i = $27;
+ }
+ $28 = $c;
+ STACKTOP = sp;return ($28|0);
+}
+function _deref_complex_doubles($vals,$n) {
+ $vals = $vals|0;
+ $n = $n|0;
+ var $0 = 0, $1 = 0, $10 = 0, $11 = 0, $12 = 0, $13 = 0.0, $14 = 0, $15 = 0, $16 = 0, $17 = 0, $18 = 0, $19 = 0, $2 = 0, $20 = 0, $21 = 0.0, $22 = 0, $23 = 0.0, $24 = 0, $25 = 0, $26 = 0.0;
+ var $27 = 0, $28 = 0, $29 = 0, $3 = 0, $30 = 0, $31 = 0, $32 = 0, $33 = 0, $34 = 0, $4 = 0, $5 = 0, $6 = 0, $7 = 0, $8 = 0, $9 = 0, $d = 0, $i = 0, label = 0, sp = 0;
+ sp = STACKTOP;
+ STACKTOP = STACKTOP + 32|0; if ((STACKTOP|0) >= (STACK_MAX|0)) abort();
+ $2 = sp;
+ $0 = $vals;
+ $1 = $n;
+ $3 = $1;
+ $4 = $3<<3;
+ $5 = $4<<1;
+ $6 = (_malloc($5)|0);
+ $d = $6;
+ $i = 0;
+ while(1) {
+  $7 = $i;
+  $8 = $1;
+  $9 = ($7|0)<($8|0);
+  if (!($9)) {
+   break;
+  }
+  $10 = $i;
+  $11 = $0;
+  $12 = (($11) + ($10<<4)|0);
+  $13 = +HEAPF64[$12>>3];
+  $14 = $i;
+  $15 = $14<<1;
+  $16 = $d;
+  $17 = (($16) + ($15<<3)|0);
+  HEAPF64[$17>>3] = $13;
+  $18 = $i;
+  $19 = $0;
+  $20 = (($19) + ($18<<4)|0);
+  $21 = +HEAPF64[$20>>3];
+  $22 = ((($20)) + 8|0);
+  $23 = +HEAPF64[$22>>3];
+  $24 = ((($2)) + 8|0);
+  HEAPF64[$2>>3] = $21;
+  HEAPF64[$24>>3] = $23;
+  $25 = ((($2)) + 8|0);
+  $26 = +HEAPF64[$25>>3];
+  $27 = $i;
+  $28 = $27<<1;
+  $29 = (($28) + 1)|0;
+  $30 = $d;
+  $31 = (($30) + ($29<<3)|0);
+  HEAPF64[$31>>3] = $26;
+  $32 = $i;
+  $33 = (($32) + 1)|0;
+  $i = $33;
+ }
+ $34 = $d;
+ STACKTOP = sp;return ($34|0);
+}
 function _malloc($bytes) {
  $bytes = $bytes|0;
  var $$3$i = 0, $$lcssa = 0, $$lcssa211 = 0, $$lcssa215 = 0, $$lcssa216 = 0, $$lcssa217 = 0, $$lcssa219 = 0, $$lcssa222 = 0, $$lcssa224 = 0, $$lcssa226 = 0, $$lcssa228 = 0, $$lcssa230 = 0, $$lcssa232 = 0, $$pre = 0, $$pre$i = 0, $$pre$i$i = 0, $$pre$i22$i = 0, $$pre$i25 = 0, $$pre$phi$i$iZ2D = 0, $$pre$phi$i23$iZ2D = 0;
@@ -8727,10 +8881,16 @@ function _memcpy(dest, src, num) {
 // EMSCRIPTEN_END_FUNCS
 
 
-  return { _strlen: _strlen, _free: _free, _memset: _memset, _malloc: _malloc, _memcpy: _memcpy, _sum: _sum, runPostSets: runPostSets, stackAlloc: stackAlloc, stackSave: stackSave, stackRestore: stackRestore, establishStackSpace: establishStackSpace, setThrew: setThrew, setTempRet0: setTempRet0, getTempRet0: getTempRet0 };
+  return { _malloc: _malloc, _strlen: _strlen, _free: _free, _heap_complex_doubles: _heap_complex_doubles, _deref_complex_doubles: _deref_complex_doubles, _memset: _memset, _heap_complex_double: _heap_complex_double, _memcpy: _memcpy, _deref_complex_double_imag: _deref_complex_double_imag, _sum: _sum, _deref_complex_double_real: _deref_complex_double_real, runPostSets: runPostSets, stackAlloc: stackAlloc, stackSave: stackSave, stackRestore: stackRestore, establishStackSpace: establishStackSpace, setThrew: setThrew, setTempRet0: setTempRet0, getTempRet0: getTempRet0 };
 })
 // EMSCRIPTEN_END_ASM
 (Module.asmGlobalArg, Module.asmLibraryArg, buffer);
+var real__heap_complex_double = asm["_heap_complex_double"]; asm["_heap_complex_double"] = function() {
+assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
+assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
+return real__heap_complex_double.apply(null, arguments);
+};
+
 var real__strlen = asm["_strlen"]; asm["_strlen"] = function() {
 assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
 assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
@@ -8743,10 +8903,34 @@ assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it a
 return real__free.apply(null, arguments);
 };
 
+var real__heap_complex_doubles = asm["_heap_complex_doubles"]; asm["_heap_complex_doubles"] = function() {
+assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
+assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
+return real__heap_complex_doubles.apply(null, arguments);
+};
+
+var real__deref_complex_doubles = asm["_deref_complex_doubles"]; asm["_deref_complex_doubles"] = function() {
+assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
+assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
+return real__deref_complex_doubles.apply(null, arguments);
+};
+
 var real__malloc = asm["_malloc"]; asm["_malloc"] = function() {
 assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
 assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
 return real__malloc.apply(null, arguments);
+};
+
+var real__deref_complex_double_imag = asm["_deref_complex_double_imag"]; asm["_deref_complex_double_imag"] = function() {
+assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
+assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
+return real__deref_complex_double_imag.apply(null, arguments);
+};
+
+var real__deref_complex_double_real = asm["_deref_complex_double_real"]; asm["_deref_complex_double_real"] = function() {
+assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. wait for main() to be called)');
+assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
+return real__deref_complex_double_real.apply(null, arguments);
 };
 
 var real__sum = asm["_sum"]; asm["_sum"] = function() {
@@ -8754,12 +8938,17 @@ assert(runtimeInitialized, 'you need to wait for the runtime to be ready (e.g. w
 assert(!runtimeExited, 'the runtime was exited (use NO_EXIT_RUNTIME to keep it alive after main() exits)');
 return real__sum.apply(null, arguments);
 };
+var _heap_complex_double = Module["_heap_complex_double"] = asm["_heap_complex_double"];
 var _strlen = Module["_strlen"] = asm["_strlen"];
 var _free = Module["_free"] = asm["_free"];
 var runPostSets = Module["runPostSets"] = asm["runPostSets"];
+var _heap_complex_doubles = Module["_heap_complex_doubles"] = asm["_heap_complex_doubles"];
 var _memset = Module["_memset"] = asm["_memset"];
+var _deref_complex_doubles = Module["_deref_complex_doubles"] = asm["_deref_complex_doubles"];
 var _malloc = Module["_malloc"] = asm["_malloc"];
 var _memcpy = Module["_memcpy"] = asm["_memcpy"];
+var _deref_complex_double_imag = Module["_deref_complex_double_imag"] = asm["_deref_complex_double_imag"];
+var _deref_complex_double_real = Module["_deref_complex_double_real"] = asm["_deref_complex_double_real"];
 var _sum = Module["_sum"] = asm["_sum"];
 ;
 

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:test/test.dart';
+import 'package:complex/complex.dart';
 import 'package:emscripten/emscripten.dart';
 
 class TestModule extends Module {
@@ -54,6 +55,13 @@ testModule() {
         int ptr = module.heapDouble(3.14);
         expect(ptr, isNonZero);
       });
+      test('complex', () {
+        var c = new Complex(rand(), rand());
+        int ptr = module.heapComplex(c);
+        expect(ptr, isNonZero);
+        var c2 = module.derefComplex(ptr);
+        expect(c2, equals(c));
+      });
       test('strings', () {
         var l = new List<String>.generate(rint(), (i) => str);
         int ptr = module.heapStrings(l);
@@ -69,6 +77,12 @@ testModule() {
         int ptr = module.heapInts(l);
         expect(ptr, isNonZero);
       });
+      test('complex list', () {
+        int n = rint();
+        var l = new List.generate(n, (_) => new Complex(rand(), rand()));
+        int ptr = module.heapComplexList(l);
+        expect(ptr, isNonZero);
+      });
     });
 
     group('deref', () {
@@ -80,18 +94,25 @@ testModule() {
           expect(module.stringify(ptr, false), isNot(equals(str)));
         });
         test('int', () {
-          var i = 42;
+          var i = rint();
           int ptr = module.heapInt(i);
           expect(module.derefInt(ptr), equals(i));
           module.heapInt(-i);
           expect(module.derefInt(ptr, false), isNot(equals(i)));
         });
         test('double', () {
-          var d = 3.14;
+          var d = rand();
           int ptr = module.heapDouble(d);
           expect(module.derefDouble(ptr), equals(d));
           module.heapDouble(-d);
           expect(module.derefDouble(ptr, false), isNot(equals(d)));
+        });
+        test('complex', () {
+          var c = new Complex(rand(), rand());
+          int ptr = module.heapComplex(c);
+          expect(module.derefComplex(ptr), equals(c));
+          module.heapComplex(-c);
+          expect(module.derefComplex(ptr, false), isNot(equals(c)));
         });
         test('strings', () {
           var n = rint();
@@ -140,6 +161,24 @@ testModule() {
           }
           module.heapInts(l3);
           Int32List l4 = module.derefInts(ptr, n, false);
+          expect(l4, isNot(equals(l)));
+        });
+        test('complex list', () {
+          var n = rint();
+          var l = new List<Complex>(n);
+          for (var i = 0; i < n; i++) {
+            l[i] = new Complex(rand(), rand());
+          }
+          int ptr = module.heapComplexList(l);
+          List<Complex> l2 = module.derefComplexList(ptr, n);
+          expect(l2, equals(l));
+
+          var l3 = new List<Complex>(n);
+          for (var i = 0; i < n; i++) {
+            l3[i] = -l[i];
+          }
+          module.heapComplexList(l3);
+          List<Complex> l4 = module.derefComplexList(ptr, n, false);
           expect(l4, isNot(equals(l)));
         });
       });
@@ -195,6 +234,19 @@ testModule() {
           expect(l2, equals(l));
           // TODO: Check values are copied
           Int32List l3 = module.derefInts(ptr, n);
+          expect(l3, equals(l));
+        });
+        test('complex list', () {
+          var n = rint();
+          var l = new List<Complex>(n);
+          for (var i = 0; i < n; i++) {
+            l[i] = new Complex(rand(), rand());
+          }
+          int ptr = module.heapComplexList(l);
+          List<Complex> l2 = module.derefComplexList(ptr, n, false);
+          expect(l2, equals(l));
+          // TODO: Check values are copied
+          List<Complex> l3 = module.derefComplexList(ptr, n);
           expect(l3, equals(l));
         });
       });
