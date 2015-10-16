@@ -8,7 +8,7 @@ import 'package:complex/complex.dart';
 import 'package:emscripten/emscripten.dart';
 
 class TestModule extends Module {
-  TestModule() : super(moduleName: 'TestModule');
+  TestModule() : super.func('TestModule');
 
   int sum(int a, int b) => callFunc('sum', [a, b]);
 }
@@ -24,7 +24,7 @@ double rand() => _r.nextDouble();
 main() {
   Module module;
   setUp(() {
-    module = new Module(moduleName: 'TestModule');
+    module = new Module.func('TestModule');
   });
   test('constructor', () {
     expect(() {

@@ -1,6 +1,7 @@
 library emscripten.fs.test;
 
 import 'package:test/test.dart';
+import 'package:emscripten/emscripten.dart';
 import 'package:emscripten/experimental.dart';
 
 import 'module_test.dart' show str;
@@ -8,7 +9,8 @@ import 'module_test.dart' show str;
 main() {
   FS fs;
   setUp(() {
-    fs = new FS();
+    var module = new Module.func('TestModule');
+    fs = new FS.func(module.module);
   });
 
   test('writeFile', () {

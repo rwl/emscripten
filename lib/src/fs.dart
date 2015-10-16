@@ -17,6 +17,14 @@ import 'dart:typed_data';
 class FS {
   final js.JsObject _module;
 
+  FS.func(js.JsObject context, [String funcName = 'getFS'])
+      : _module =
+            (context == null ? js.context : context).callMethod(funcName) {
+    if (_module == null) {
+      throw new ArgumentError.notNull('module');
+    }
+  }
+
   FS({js.JsObject context, String moduleName: 'FS'})
       : _module = (context == null ? js.context : context)[moduleName];
 

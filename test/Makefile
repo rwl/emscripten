@@ -3,10 +3,10 @@ default: all
 LIBDIR = ../lib
 include $(LIBDIR)/complex.inc
 
-EMFLAGS = -s "EXPORT_NAME='TestModule'" \
+EMFLAGS = -s "EXPORT_NAME='TestModule'" -s MODULARIZE=1 \
 -s EXPORTED_FUNCTIONS="['_malloc',\
 $(EXP_COMPLEX),\
-'_sum']" \
+'_sum','_cdiv']" \
 --pre-js pre.js --post-js $(LIBDIR)/post.js
 
 CFLAGS += -O0
